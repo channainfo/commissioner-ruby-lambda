@@ -10,4 +10,4 @@ RUN bundle install
 
 COPY . .
 
-CMD ["./media_convert_create_job.rb"]
+CMD ["./lib/media_convert/create_job.rb"]
