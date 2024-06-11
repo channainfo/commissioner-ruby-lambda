@@ -12,7 +12,7 @@ or manually create the following config .bundle/config
 
 ```yaml
 ---
-BUNDLE_PATH: "vendor/bundle"
+BUNDLE_PATH: "layer/gems"
 BUNDLE_WITHOUT: "development:test"
 ```
 
@@ -31,13 +31,21 @@ ruby ./lib/media_convert/create_job.rb
 bundle exec rspec spec
 ```
 
+## Create a lambda-layer
+
+Zip the lambda-ruby folder and rename the zip output to lambda-layer.zip
+
+```sh
+zip -r  lambda-layer.zip -x "lambda-ruby/vendor/*"
+```
+
 ## Register lambda handler
 
 To test locally
 
 ```sh
 # cd to the root of the project
-ruby lib/media_convert/callback.br
+ruby lib/media_convert/callback.rb
 ```
 
 To run in the AWS lambda with engine ruby using [Terraform](https://github.com/channainfo/commissioner-terraform-aws/tree/develop/modules/media_convert)
@@ -55,7 +63,7 @@ resource "aws_lambda_function" "media_convert_callback" {
   architectures = ["arm64"]
 
   ephemeral_storage {
-    size = 10240 # Min 512 MB and the Max 10240 MB
+    size = 512 # Min 512 MB and the Max 10240 MB
   }
 }
 ```

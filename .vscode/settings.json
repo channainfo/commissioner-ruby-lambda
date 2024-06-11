@@ -1,0 +1,8 @@
+{
+  "files.associations": {
+    "*.html.erb": "html",
+    "*.js.erb": "javascript",
+    "*.scss": "scss",
+    "config": "yaml"
+  }
+}

@@ -7,8 +7,10 @@ require 'logger'
 $logger = Logger.new($stdout)
 
 def handler(event:, context:)
-  p "Received event: #{event}"
-  $logger.info("Lambda function media_convert_callback called with event: #{event}")
+
+  $logger.info { "Received event: #{event}" }
+  $logger.info { "Lambda function media_convert_callback called with event: #{event}" }
+  $logger.info { "Lambda function media_convert_callback called with context: #{context}" }
 
   # Process the event data here
   # event_detail = event['detail']
@@ -18,5 +20,10 @@ def handler(event:, context:)
   # Log the status and job ID
   # puts "MediaConvert job #{job_id} has status: #{status}"
 
-  { statusCode: 200, body: JSON.generate('Event processed successfully') }
+  body = JSON.generate(event)
+  response = { statusCode: 200, body: body}
+
+  $logger.info { "response: #{response}" }
+
+  response
 end
