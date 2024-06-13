@@ -1,0 +1,38 @@
+{
+  "Records": [
+    {
+      "eventVersion": "2.1",
+      "eventSource": "aws:s3",
+      "awsRegion": "ap-southeast-1",
+      "eventTime": "2024-06-11T02:58:20.153Z",
+      "eventName": "ObjectCreated:Copy",
+      "userIdentity": {
+        "principalId": "A14CU4UNDU10GR"
+      },
+      "requestParameters": {
+        "sourceIPAddress": "172.16.132.162"
+      },
+      "responseElements": {
+        "x-amz-request-id": "STCK2T30AVCRAX0F",
+        "x-amz-id-2": "9chxC2bmtmrzRxkNn7Jypo3A5BdfqbFPpGJQrFoPbHtMY1eGTsYulMBjbixaGGmfWyHi7jEqIo6L3mYUENKJ5QXjH6C635Qg"
+      },
+      "s3": {
+        "s3SchemaVersion": "1.0",
+        "configurationId": "tf-s3-lambda-20240609064345190900000001",
+        "bucket": {
+          "name": "production-cm",
+          "ownerIdentity": {
+            "principalId": "A14CU4UNDU10GR"
+          },
+          "arn": "arn:aws:s3:::production-cm"
+        },
+        "object": {
+          "key": "input/cohesion.mp4",
+          "size": 9432978,
+          "eTag": "c1ad3716ee5ed6b639d8218289d11f7e",
+          "sequencer": "006667BD4BEBDFF4C8"
+        }
+      }
+    }
+  ]
+}
