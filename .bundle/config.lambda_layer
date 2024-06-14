@@ -1,0 +1,4 @@
+---
+# lambda_layer places under the /opt dir
+BUNDLE_PATH: "/opt/vendor/bundle"
+BUNDLE_WITHOUT: "test:development"

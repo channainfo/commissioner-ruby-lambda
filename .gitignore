@@ -1,3 +1,6 @@
 vendor/*
 layer/gems/*
 .env
+*function.zip
+*layer.zip
+ruby/*
