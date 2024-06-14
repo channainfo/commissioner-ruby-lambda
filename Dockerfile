@@ -4,12 +4,12 @@ FROM ruby:3.2.0
 RUN bundle config --global frozen 1
 
 # config necessary env ( docker-compose or aws ecs environment variables)
-ENV AWS_ACCESS_KEY_ID ""
-ENV AWS_SECRET_ACCESS_KEY ""
-ENV AWS_REGION "ap-southeast-1"
-ENV AWS_BUCKET_NAME ""
-ENV AWS_MEDIA_CONVERT_ROLE ""
-ENV AWS_MEDIA_CONVERT_TOPIC ""
+ENV AWS_CONF_ACCESS_KEY_ID ""
+ENV AWS_CONF_SECRET_ACCESS_KEY ""
+ENV AWS_CONF_REGION "ap-southeast-1"
+ENV AWS_CONF_BUCKET_NAME ""
+ENV AWS_CONF_MEDIA_CONVERT_ROLE ""
+ENV AWS_CONF_MEDIA_CONVERT_TOPIC ""
 
 WORKDIR $HOME/app
 
