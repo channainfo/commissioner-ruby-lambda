@@ -42,9 +42,9 @@ describe Service::JobCreator do
 
   describe '#client_options' do
     it 'return the client_options' do
-      ENV['AWS_ACCESS_KEY_ID'] = 'mykey'
-      ENV['AWS_SECRET_ACCESS_KEY'] = 'my_secret'
-      ENV['AWS_REGION'] = 'ap-southeast-1'
+      ENV['AWS_CONF_ACCESS_KEY_ID'] = 'mykey'
+      ENV['AWS_CONF_SECRET_ACCESS_KEY'] = 'my_secret'
+      ENV['AWS_CONF_REGION'] = 'ap-southeast-1'
 
       expected_options = { access_key_id: 'mykey', secret_access_key: 'my_secret', region: 'ap-southeast-1' }
       expect(subject.client_options).to match(expected_options)

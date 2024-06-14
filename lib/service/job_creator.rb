@@ -53,9 +53,9 @@ module Service
 
     def client_options
       {
-        access_key_id: ENV.fetch('AWS_ACCESS_KEY_ID'),
-        secret_access_key: ENV.fetch('AWS_SECRET_ACCESS_KEY'),
-        region: ENV.fetch('AWS_REGION')
+        access_key_id: ENV.fetch('AWS_CONF_ACCESS_KEY_ID'),
+        secret_access_key: ENV.fetch('AWS_CONF_SECRET_ACCESS_KEY'),
+        region: ENV.fetch('AWS_CONF_REGION')
       }
     end
 
@@ -122,12 +122,12 @@ module Service
     end
 
     def sns_topic_arn
-      ENV.fetch('AWS_MEDIA_CONVERT_TOPIC')
+      ENV.fetch('AWS_CONF_MEDIA_CONVERT_TOPIC')
     end
 
     def arn_role
       # 'arn:aws:iam::123456789012:role/MediaConvert_Default_Role'
-      ENV.fetch('AWS_MEDIA_CONVERT_ROLE')
+      ENV.fetch('AWS_CONF_MEDIA_CONVERT_ROLE')
     end
 
     def settings
