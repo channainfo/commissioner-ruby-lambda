@@ -22,7 +22,7 @@ BUNDLE_WITHOUT: "development:test"
 docker build -t media_convert .
 docker run -it media_convert bash
 
-ruby ./lib/media_convert/create_job.rb
+ruby ./lib/handler/create_job.rb
 ```
 
 ## Run test
@@ -45,7 +45,7 @@ To test locally
 
 ```sh
 # cd to the root of the project
-ruby lib/media_convert/callback.rb
+ruby lib/handler/callback.rb
 ```
 
 To run in the AWS lambda with engine ruby using [Terraform](https://github.com/channainfo/commissioner-terraform-aws/tree/develop/modules/media_convert)
