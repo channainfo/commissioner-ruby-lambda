@@ -2,11 +2,14 @@
 require_relative '../boot.rb'
 require_relative '../service/job_creator'
 
+$logger = Logger.new($stdout)
+$logger.info { "#{__FILE__} is loading" }
+
 def handler(event:, context:)
 
   # Initialize logger
-  logger = Logger.new($stdout)
-  logger.info { "Create job with event: #{event}" }
+  $logger = Logger.new($stdout)
+  $logger.info { "Create job with event: #{event}" }
 
   { statusCode: 200, body: JSON.generate('Event processed successfully') }
 end

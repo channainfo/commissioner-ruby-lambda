@@ -1,0 +1,67 @@
+name: Deploy Ruby Lambda Layer
+# permissions:
+#   contents: read
+#   secrets: read
+
+on:
+  push:
+    branches:
+      - 12-build-lambda-layer
+      - build
+
+jobs:
+  build_and_deploy:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      issues: write
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.2" # Specify your Ruby version
+      - name: Build the lambda layer
+        run: |
+          # bundle config set --local path layer/gems
+          # bundle config set --local without test
+          # bundle install
+
+          ./command_layer.sh
+
+      - name: Build the lambda function
+        run: |
+          ./command_function.sh
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.REGION }}
+
+      - name: Upload the lambda layer to S3
+        run: |
+          aws s3 cp media_convert_layer.zip s3://${{secrets.BUCKET_NAME}}/lambda/media_convert_layer.zip
+
+      - name: Upload the lambda function to S3
+        run: |
+          aws s3 cp media_convert_function.zip s3://${{secrets.BUCKET_NAME}}/lambda/media_convert_function.zip
+
+      # - name: Deploy to AWS Lambda
+      #   run: |
+      #     aws --version
+      #     echo $REGION
+      #     echo "AWS_REGION: {$REGION}"
+      #     aws lambda publish-layer-version \
+      #     --layer-name ghaction_lambda_layer \
+      #     --description "Github actionr" \
+      #     --zip-file fileb://media_convert_layer.zip \
+      #     --compatible-runtimes ruby3.2
+
+      #   env:
+      #     AWS_ACCESS_KEY_ID: ${{ secrets.ACCESS_KEY_ID }}
+      #     AWS_SECRET_ACCESS_KEY: ${{ secrets.SECRET_ACCESS_KEY }}
+      #     AWS_REGION: ${{ secrets.REGION }} # Specify your AWS region

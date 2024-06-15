@@ -2,9 +2,11 @@
 require_relative '../boot'
 require_relative '../service/job_creator'
 
+$logger = Logger.new($stdout)
+$logger.info { "#{__FILE__} is loading" }
+
 def handler(event:, context:)
-  logger = Logger.new($stdout)
-  logger.info { "Callback with event: #{event}" }
+  $logger.info { "Callback with event: #{event}" }
 
   body = JSON.generate(event)
   response = { statusCode: 200, body: body}
