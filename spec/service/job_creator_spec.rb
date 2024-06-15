@@ -23,7 +23,7 @@ describe Service::JobCreator do
   describe '#call' do
     it 'return call' do
       client = double(:media_convert_client)
-      job_options = { some_settings: { }}
+      job_options = { some_settings: {} }
 
       allow(subject).to receive(:client).and_return(client)
       allow(subject).to receive(:job_options).and_return(job_options)
@@ -134,5 +134,4 @@ describe Service::JobCreator do
       expect(result).to include(:name_modifier, :container_settings, :video_description, :audio_descriptions)
     end
   end
-
 end

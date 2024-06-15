@@ -8,7 +8,7 @@ module Service
       s3_object_info
     end
 
-    # 's3://production-cm/media-convert/startwar.mp4'
+    # rubocop:disable Metrics/AbcSize
     def s3_object_info
       record = event['Records'][0]
       {
@@ -20,5 +20,6 @@ module Service
         event_time: record['eventTime']
       }
     end
+    # rubocop:enable Metrics/AbcSize
   end
 end

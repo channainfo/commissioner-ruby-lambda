@@ -1,8 +1,10 @@
 require_relative 'base'
+require_relative 'job_creator_helper'
 require 'aws-sdk-mediaconvert'
 
 module Service
   class JobCreator < Base
+    include JobCreatorHelper
 
     # framerate
     FR_CINEMATIC = 24
@@ -41,7 +43,7 @@ module Service
     # allow_hd: false
     # framerate: FR_CINEMATIC
 
-    delegate :input_s3_uri_file, :output_s3_uri_path, :allow_hd, :framerate, to: :context 
+    delegate :input_s3_uri_file, :output_s3_uri_path, :allow_hd, :framerate, to: :context
 
     def call
       client.create_job(job_options)
@@ -69,33 +71,6 @@ module Service
       @output_sub_dir_name = names[0..-2].join('-')
       @output_sub_dir_name
     end
-
-
-    # role: mediaconvert_role_arn,
-    # settings: job_settings,
-    # user_metadata: {
-    #   "Customer": "ExampleCustomer"
-    # },
-    # queue: "Default",
-    # status_update_interval: "SECONDS_60",
-    # priority: 0,
-    # hop_destinations: [],
-    # correlation_id: "example-correlation-id",
-    # job_template: "",
-    # notifications: {
-    #   "Progressing": {
-    #     "Sns": sns_topic_arn
-    #   },
-    #   "Complete": {
-    #     "Sns": sns_topic_arn
-    #   },
-    #   "Error": {
-    #     "Sns": sns_topic_arn
-    #   },
-    #   "Warning": {
-    #     "Sns": sns_topic_arn
-    #   }
-    # }
 
     def job_options
       {
@@ -227,71 +202,6 @@ module Service
         standard: { resolution: '854x480', bitrate: 1000..1500, framerate: [24, 30], audio_rate: 128 },
         low: { resolution: '640x360', bitrate: 500..1000, framerate: [24, 30], audio_rate: 96 },
         bottom: { resolution: '426x240', bitrate: 300..700, framerate: [24, 30], audio_rate: 64 }
-      }
-    end
-
-    def create_output(group_type, video_quality_type)
-      video_quality = video_qualities[video_quality_type]
-      resolution = video_quality[:resolution]
-      bitrate = video_quality[:bitrate].first * 1_000
-
-      # max_bitrate = video_quality[:bitrate].last * 1_000
-      audio_bitrate = video_quality[:audio_rate] * 1_000
-      name_modifier = "-#{resolution.gsub('x', '_')}"
-
-      (width, height) = resolution.split('x').map(&:to_i)
-
-      video_description = {
-        width: width,
-        height: height,
-        codec_settings: {
-          codec: 'H_264',
-          h264_settings: {
-            # Use constant bit rate(CBR) for smooth playback and player compatibility.
-            rate_control_mode: 'CBR',
-            bitrate: bitrate,
-            # Use QVBR (Quality-Defined Variable Bitrate) to maintain consistent quality.
-            # rate_control_mode: 'QVBR',
-            # max_bitrate: bitrate,
-            scene_change_detect: 'ENABLED',
-            quality_tuning_level: 'SINGLE_PASS',
-
-            framerate_numerator: framerate,
-            framerate_denominator: 1
-          }
-        }
-      }
-
-      audio_description = {
-        audio_type_control: 'FOLLOW_INPUT',
-        codec_settings: {
-          codec: 'AAC',
-          aac_settings: {
-            bitrate: audio_bitrate,
-            coding_mode: 'CODING_MODE_2_0',
-            sample_rate: 48_000
-          }
-        }
-      }
-
-      # DEFAULT TO Dash
-      container_settings = {
-        container: 'MPD',
-        mpd_settings: {}
-      }
-
-      if group_type == 'HLS'
-        container_settings = {
-          container: 'M3U8',
-          m3u_8_settings: {}
-        }
-      end
-
-      {
-        name_modifier: name_modifier,
-        container_settings: container_settings,
-        video_description: video_description,
-        audio_descriptions: [audio_description]
       }
     end
   end

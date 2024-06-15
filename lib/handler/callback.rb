@@ -6,13 +6,11 @@ $logger = Logger.new($stdout)
 $logger.info { "#{__FILE__} is loading" }
 
 def handler(event:, context:)
-  $logger.info { "Callback with event: #{event}" }
+  $logger.info { "Callback with event: #{event}, context: #{context}" }
 
   body = JSON.generate(event)
-  response = { statusCode: 200, body: body}
-  response
+  { statusCode: 200, body: body }
 end
 
 # Enable this to test if it can be invoked correctly
 # handler(event: {status: 'COMPLETE', media: 'xyz' }, context: 'Hello')
-
