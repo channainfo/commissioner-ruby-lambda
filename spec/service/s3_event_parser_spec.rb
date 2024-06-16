@@ -20,7 +20,8 @@ describe Service::S3EventParser do
         etag: 'c1ad3716ee5ed6b639d8218289d11f7e',
         event_time: '2024-06-11T02:58:20.153Z'
       }
-      expect(subject.call).to match(expected_result)
+      subject.call
+      expect(subject.context.result).to match(expected_result)
     end
   end
 end

@@ -78,26 +78,8 @@ module Service
         settings: settings,
         # sns
         # status_update_interval: 'SECONDS_60',
-        status_update_interval: '60',
-        notifications: {
-          Progressing: {
-            Sns: sns_topic_arn
-          },
-          Complete: {
-            Sns: sns_topic_arn
-          },
-          Error: {
-            Sns: sns_topic_arn
-          },
-          Warning: {
-            Sns: sns_topic_arn
-          }
-        }
+        status_update_interval: '60'
       }
-    end
-
-    def sns_topic_arn
-      ENV.fetch('AWS_CONF_MEDIA_CONVERT_TOPIC')
     end
 
     def arn_role
