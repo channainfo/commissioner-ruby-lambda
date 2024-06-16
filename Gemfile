@@ -8,6 +8,8 @@ gem 'nokogiri'
 
 group :development, :test do
   gem 'dotenv'
+  gem 'rubocop', require: false
+  gem 'rubocop-performance'
 end
 
 group :test do

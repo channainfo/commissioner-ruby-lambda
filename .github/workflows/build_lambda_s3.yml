@@ -25,10 +25,6 @@ jobs:
           ruby-version: "3.2" # Specify your Ruby version
       - name: Build the lambda layer
         run: |
-          # bundle config set --local path layer/gems
-          # bundle config set --local without test
-          # bundle install
-
           ./command_layer.sh
 
       - name: Build the lambda function

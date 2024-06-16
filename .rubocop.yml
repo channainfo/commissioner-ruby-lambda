@@ -1,0 +1,52 @@
+require: rubocop-performance
+
+AllCops:
+  NewCops: enable
+  TargetRubyVersion: 2.7
+  Exclude:
+    - "db/schema.rb"
+    - "bin/*"
+    - "node_modules/**/*"
+    - "vendor/**/*"
+    - "spec/spec_helper.rb"
+
+# Linting checks
+Lint:
+  Enabled: true
+
+# Metrics
+Metrics/BlockLength:
+  Exclude:
+    - "spec/**/*.rb" # Exclude spec files from block length checks
+  Max: 25 # Maximum block length
+
+# Documentation
+Style/Documentation:
+  Enabled: false # Skip documentation check
+
+# Method length
+Metrics/MethodLength:
+  Max: 60 # Maximum method length
+
+# Class and module length
+Metrics/ClassLength:
+  Max: 210 # Maximum class length
+
+# Example check: line length
+Layout/LineLength:
+  Max: 120 # Maximum line length
+  AllowedPatterns: ['\A\s*#'] # Ignore lines that are just comments
+
+# Example check: string literals
+Style/StringLiterals:
+  EnforcedStyle: single_quotes # Prefer single quotes
+
+Style/FrozenStringLiteralComment:
+  Enabled: false
+
+Style/GlobalVars:
+  Enabled: false
+
+# Example of enabling performance-related cops
+Performance:
+  Enabled: true
