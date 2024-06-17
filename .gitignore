@@ -1,6 +1,8 @@
-vendor/*
-layer/gems/*
+.byebug_history
 .env
+
 *function.zip
+layer/gems/*
 *layer.zip
 ruby/*
+vendor/*

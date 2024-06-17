@@ -7,6 +7,9 @@ gem 'interactor'
 gem 'nokogiri'
 
 group :development, :test do
+  # enable debugger in our ruby
+  gem 'byebug'
+
   gem 'dotenv'
   gem 'rubocop', require: false
   gem 'rubocop-performance'
