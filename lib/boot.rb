@@ -11,6 +11,6 @@ else
   Bundler.require(:default, group)
 end
 
-require 'dotenv/load' if %i[development test].include?($APP_ENV)
+require 'dotenv/load' if %i[development test].include?(group)
 require 'logger'
 require 'json'

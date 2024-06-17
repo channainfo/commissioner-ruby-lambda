@@ -6,7 +6,7 @@ name: Deploy Ruby Lambda Layer
 on:
   push:
     branches:
-      - 12-build-lambda-layer
+      - 16-create_job-from-event-payload
       - build
 
 jobs:

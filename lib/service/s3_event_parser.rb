@@ -11,7 +11,7 @@ module Service
     # rubocop:disable Metrics/AbcSize
     def s3_object_info
       record = event['Records'][0]
-      {
+      context.result = {
         s3_uri: "s3://#{record['s3']['bucket']['name']}/#{record['s3']['object']['key']}",
         bucket_name: record['s3']['bucket']['name'],
         size: record['s3']['object']['size'],
@@ -19,6 +19,8 @@ module Service
         etag: record['s3']['object']['eTag'],
         event_time: record['eventTime']
       }
+
+      context.result
     end
     # rubocop:enable Metrics/AbcSize
   end

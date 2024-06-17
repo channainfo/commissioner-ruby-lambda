@@ -3,6 +3,13 @@ require 'handler/create_job'
 
 describe 'handler' do
   describe 'create_job' do
-    handler(event: { job: 'tyui6789' }, context: 'create_job')
+    let(:event) do
+      dir_name = File.dirname(__dir__)
+      file_path = File.join(dir_name, 'fixtures', 'media_convert', 'create_job_event.json')
+      JSON.parse(File.read(file_path))
+    end
+    it 'handles create job correctly' do
+      handler(event: event, context: 'create_job')
+    end
   end
 end
