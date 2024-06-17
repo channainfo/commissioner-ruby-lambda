@@ -2,6 +2,12 @@ require 'app_spec_helper'
 require 'service/job_creator'
 
 describe Service::JobCreator do
+  let(:event) do
+    dir_name = File.dirname(__dir__)
+    file_path = File.join(dir_name, 'fixtures', 'media_convert', 'create_job_event.json')
+    JSON.parse(File.read(file_path))
+  end
+
   subject do
     described_class.new(
       input_s3_uri_file: 's3://production-cm/media-convert/startwar.mp4',
@@ -17,6 +23,36 @@ describe Service::JobCreator do
       expect(subject.output_s3_uri_path).to eq 's3://production-cm/media-convert-output'
       expect(subject.allow_hd).to eq false
       expect(subject.framerate).to eq described_class::FR_CINEMATIC
+    end
+  end
+
+  describe '.from_event' do
+    it 'return options' do
+      options = {
+        allow_hd: false,
+        framerate: 24,
+        input_s3_uri_file: 's3://production-cm/input/cohesion.mp4',
+        output_s3_uri_path: 's3://production-cm/media-convert-output'
+      }
+      allow(described_class).to receive(:extract_job_settings).and_return(options)
+
+      expect(described_class).to receive(:call).with(**options)
+      described_class.from_event(event)
+    end
+  end
+
+  describe '.extract_job_settings' do
+    it 'return options' do
+      result = described_class.extract_job_settings(event)
+
+      expected_result = {
+        allow_hd: false,
+        framerate: 24,
+        input_s3_uri_file: 's3://production-cm/input/cohesion.mp4',
+        output_s3_uri_path: 's3://production-cm/media-convert-output'
+      }
+
+      expect(result).to match(expected_result)
     end
   end
 
