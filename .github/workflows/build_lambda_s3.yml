@@ -1,13 +1,8 @@
 name: Deploy Ruby Lambda Layer
-# permissions:
-#   contents: read
-#   secrets: read
-
 on:
   push:
     branches:
-      - 16-create_job-from-event-payload
-      - build
+      - build_lambda
 
 jobs:
   build_and_deploy:
