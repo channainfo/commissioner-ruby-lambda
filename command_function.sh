@@ -21,7 +21,7 @@ mv .bundle/config.lambda_layer .bundle/config
 
 # zip the function
 zip -r $OUTPUT_ZIP $SOURCE_DIR -x "vendor/*" ".ruby-lsp/*" ".git*" "spec/*" "*.zip" "ruby/*" \
-  "*.DS_Store" > /dev/null
+  "*.DS_Store" "docs/*" > /dev/null
 
 mv .bundle/config .bundle/config.lambda_layer
 mv .bundle/config.backup .bundle/config

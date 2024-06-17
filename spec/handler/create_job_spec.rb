@@ -8,7 +8,9 @@ describe 'handler' do
       file_path = File.join(dir_name, 'fixtures', 'media_convert', 'create_job_event.json')
       JSON.parse(File.read(file_path))
     end
+
     it 'handles create job correctly' do
+      allow(Service::JobCreator).to receive(:from_event).with(event)
       handler(event: event, context: 'create_job')
     end
   end

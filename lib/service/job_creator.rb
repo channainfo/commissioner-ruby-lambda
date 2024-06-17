@@ -1,5 +1,6 @@
 require_relative 'base'
 require_relative 'job_creator_helper'
+require_relative 's3_event_parser'
 require 'aws-sdk-mediaconvert'
 
 module Service
@@ -45,6 +46,24 @@ module Service
 
     delegate :input_s3_uri_file, :output_s3_uri_path, :allow_hd, :framerate, to: :context
 
+    def self.from_event(event)
+      options = extract_job_settings(event)
+      call(**options)
+    end
+
+    def self.extract_job_settings(event)
+      event_parser = Service::S3EventParser.call(event: event)
+      s3_uri = event_parser.result[:s3_uri]
+      bucket_name = event_parser.result[:bucket_name]
+
+      {
+        input_s3_uri_file: s3_uri,
+        output_s3_uri_path: "s3://#{bucket_name}/media-convert-output",
+        allow_hd: false,
+        framerate: Service::JobCreator::FR_CINEMATIC
+      }
+    end
+
     def call
       client.create_job(job_options)
     end
@@ -75,10 +94,7 @@ module Service
     def job_options
       {
         role: arn_role,
-        settings: settings,
-        # sns
-        # status_update_interval: 'SECONDS_60',
-        status_update_interval: '60'
+        settings: settings
       }
     end
 
@@ -154,7 +170,7 @@ module Service
 
     def output_group_dash
       # dash config
-      min_buffer_time = SEGMENT_LENGTH * SEGMENT_BUFFER_COUNT
+      min_buffer_time = SEGMENT_LENGTH * SEGMENT_BUFFER_COUNT * 1000
       {
         name: 'DASHGroup',
         output_group_settings: {
