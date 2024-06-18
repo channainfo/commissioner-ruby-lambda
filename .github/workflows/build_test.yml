@@ -29,5 +29,5 @@ jobs:
           AWS_CONF_ACCESS_KEY_ID: ""
           AWS_CONF_SECRET_ACCESS_KEY: "+JvZqq+"
           AWS_CONF_REGION: "ap-southeast-1"
-          AWS_CONF_BUCKET_OUPUT: "-cm"
+          AWS_CONF_BUCKET_OUTPUT: "-cm"
           AWS_CONF_MEDIA_CONVERT_ROLE: "arn:aws:iam:::role/"

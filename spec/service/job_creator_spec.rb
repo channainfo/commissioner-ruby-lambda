@@ -36,7 +36,7 @@ describe Service::JobCreator do
         input_s3_uri_file: 's3://production-cm/input/cohesion.mp4',
         output_s3_uri_path: "s3://#{bucket_output}/medias"
       }
-      allow(ENV).to receive(:fetch).with('AWS_CONF_BUCKET_OUPUT').and_return(bucket_output)
+      allow(ENV).to receive(:fetch).with('AWS_CONF_BUCKET_OUTPUT').and_return(bucket_output)
       allow(described_class).to receive(:extract_job_settings).and_return(options)
 
       expect(described_class).to receive(:call).with(**options)
@@ -46,7 +46,7 @@ describe Service::JobCreator do
 
   describe '.extract_job_settings' do
     it 'return options' do
-      allow(ENV).to receive(:fetch).with('AWS_CONF_BUCKET_OUPUT').and_return(bucket_output)
+      allow(ENV).to receive(:fetch).with('AWS_CONF_BUCKET_OUTPUT').and_return(bucket_output)
       result = described_class.extract_job_settings(event)
 
       expected_result = {

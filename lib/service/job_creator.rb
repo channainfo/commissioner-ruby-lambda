@@ -56,7 +56,7 @@ module Service
       s3_uri = event_parser.result[:s3_uri]
 
       # ouput-production-cm
-      destination_bucket = ENV.fetch('AWS_CONF_BUCKET_OUPUT')
+      destination_bucket = ENV.fetch('AWS_CONF_BUCKET_OUTPUT')
 
       {
         input_s3_uri_file: s3_uri,
