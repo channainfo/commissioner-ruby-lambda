@@ -35,11 +35,11 @@ jobs:
 
       - name: Upload the lambda layer to S3
         run: |
-          aws s3 cp media_convert_layer.zip s3://${{secrets.BUCKET_NAME}}/lambda/media_convert_layer.zip
+          aws s3 cp media_convert_layer.zip s3://${{secrets.INPUT_BUCKET_NAME}}/lambda/media_convert_layer.zip
 
       - name: Upload the lambda function to S3
         run: |
-          aws s3 cp media_convert_function.zip s3://${{secrets.BUCKET_NAME}}/lambda/media_convert_function.zip
+          aws s3 cp media_convert_function.zip s3://${{secrets.INPUT_BUCKET_NAME}}/lambda/media_convert_function.zip
 
       # - name: Deploy to AWS Lambda
       #   run: |

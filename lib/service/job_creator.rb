@@ -54,11 +54,13 @@ module Service
     def self.extract_job_settings(event)
       event_parser = Service::S3EventParser.call(event: event)
       s3_uri = event_parser.result[:s3_uri]
-      bucket_name = event_parser.result[:bucket_name]
+
+      # ouput-production-cm
+      destination_bucket = ENV.fetch('AWS_CONF_BUCKET_OUPUT')
 
       {
         input_s3_uri_file: s3_uri,
-        output_s3_uri_path: "s3://#{bucket_name}/media-convert-output",
+        output_s3_uri_path: "s3://#{destination_bucket}/medias",
         allow_hd: false,
         framerate: Service::JobCreator::FR_CINEMATIC
       }
