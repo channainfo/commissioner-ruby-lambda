@@ -37,17 +37,17 @@ describe Service::JobCreator do
         output_s3_uri_path: "s3://#{bucket_output}/medias"
       }
       allow(ENV).to receive(:fetch).with('AWS_CONF_BUCKET_OUTPUT').and_return(bucket_output)
-      allow(described_class).to receive(:extract_job_settings).and_return(options)
+      allow(described_class).to receive(:extract_s3_options_from_event).and_return(options)
 
       expect(described_class).to receive(:call).with(**options)
       described_class.from_event(event)
     end
   end
 
-  describe '.extract_job_settings' do
+  describe '.extract_s3_options_from_event' do
     it 'return options' do
       allow(ENV).to receive(:fetch).with('AWS_CONF_BUCKET_OUTPUT').and_return(bucket_output)
-      result = described_class.extract_job_settings(event)
+      result = described_class.extract_s3_options_from_event(event)
 
       expected_result = {
         allow_hd: false,
@@ -60,23 +60,102 @@ describe Service::JobCreator do
     end
   end
 
-  describe '#call' do
+  describe '#create_job' do
     it 'return call' do
-      client = double(:media_convert_client)
-      job_options = { some_settings: {} }
+      media_convert_client = double(:media_convert_client)
+      job_options = {}
+      job_response = double(:job_response, job: :anything)
 
-      allow(subject).to receive(:client).and_return(client)
+      result = {
+        id: '5678920-02-2222',
+        arn: 'arn:5678920-02-2222',
+        status: 'PROCESSING',
+        created_at: '2024-06-18 04:30:47 +0000'
+      }
+
+      allow(subject).to receive(:media_convert_client).and_return(media_convert_client)
       allow(subject).to receive(:job_options).and_return(job_options)
+      allow(media_convert_client).to receive(:create_job).with(job_options).and_return(job_response)
+      allow(subject).to receive(:job_result).with(job_response.job).and_return(result)
 
-      expect(client).to receive(:create_job).with(job_options)
-
-      subject.call
+      subject.send(:create_job)
+      expect(subject.context.result).to match(result)
     end
   end
 
-  describe '#client' do
-    it 'return client' do
-      expect(subject.client).to be_kind_of(Aws::MediaConvert::Client)
+  describe '#sqs_message_body' do
+    it 'return sqs message body' do
+      s3_input_file = 's3://anything'
+      result = {
+        id: '5678920-02-2222',
+        arn: 'arn:5678920-02-2222',
+        status: 'PROCESSING',
+        created_at: '2024-06-18 04:30:47 +0000'
+      }
+
+      subject.context.result = result
+      allow(subject).to receive(:input_s3_uri_file).and_return(s3_input_file)
+
+      expected_result = {
+        id: '5678920-02-2222',
+        arn: 'arn:5678920-02-2222',
+        status: 'PROCESSING',
+        created_at: '2024-06-18 04:30:47 +0000',
+        message_type: :media_convert_create_job,
+        input_file: s3_input_file
+      }
+
+      result = subject.send(:sqs_message_body)
+      expect(result).to match(expected_result)
+    end
+  end
+
+  describe '#send_sqs_message' do
+    it 'send sqs message' do
+      message_body = {}
+      options = { queue_url: subject.sqs_url, message_body: message_body.to_json }
+      allow(subject).to receive(:sqs_message_body).and_return(message_body)
+      expect(subject.sqs_client).to receive(:send_message).with(options)
+      subject.send(:send_sqs_message)
+    end
+  end
+
+  describe '#call' do
+    it 'create job and send sqs message' do
+      expect(subject).to receive(:create_job)
+      expect(subject).to receive(:send_sqs_message)
+
+      subject.send(:call)
+    end
+  end
+
+  describe '#job_result' do
+    it 'return job_result' do
+      options = {
+        id: '5678920-02-2222',
+        arn: 'arn:5678920-02-2222',
+        status: 'PROCESSING',
+        created_at: '2024-06-18 04:30:47 +0000'
+      }
+
+      job_type = double(:job_type, **options)
+
+      subject = described_class.new
+      result = subject.send(:job_result, job_type)
+
+      expect(result).to match(options)
+    end
+  end
+
+  describe '#media_convert_client' do
+    it 'return media_convert_client' do
+      expect(subject.media_convert_client).to be_kind_of(Aws::MediaConvert::Client)
+    end
+  end
+
+  describe '#sqs_client' do
+    it 'return sqs_client' do
+      expect(subject.sqs_client).to be_kind_of(Aws::SQS::Client)
     end
   end
 

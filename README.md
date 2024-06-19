@@ -116,3 +116,7 @@ Make sure you create secrets value for the repository. The secrets for action ha
 # repository secrets
 
 ```
+
+## Test Adaptive bitrate streaming
+
+- <https://livepush.io/hls-player/index.html>

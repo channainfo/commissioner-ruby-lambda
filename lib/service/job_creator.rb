@@ -1,58 +1,24 @@
 require_relative 'base'
-require_relative 'job_creator_helper'
-require_relative 's3_event_parser'
+require_relative 'helper/job_creator'
+require_relative 'helper/aws_client'
+require_relative 'parser/s3_event'
+
 require 'aws-sdk-mediaconvert'
 
 module Service
   class JobCreator < Base
-    include JobCreatorHelper
-
-    # framerate
-    FR_CINEMATIC = 24
-    FR_TVSHOW = 30
-    FR_ONLINE_VDO = 30
-    FR_SPORT = 60
-    FR_GAMING = 60
-
-    # 'GOP_MULTIPLE' or 'EXACT'
-    # GOP: This setting aligns segment boundaries with GOP boundaries. This can result in segments that are slightly longer
-    # or shorter than the specified segment_length. Better Compression and Quality:
-    # EXACT: this setting ensures that segments are exactly the length specified in the segment_length parameter. This may
-    # result in a less efficient use of the GOP (Group of Pictures). EXACT for Strict Compliance
-    SEGMENT_LENGTH_CONTROL = 'GOP_MULTIPLE'.freeze
-
-    # HLS and DASH: in complex scenes or rapid changes, some segments might end up being much shorter than SEGMENT_LENGTH seconds
-    # but can not be less than MIN_SEGMENT_LENGTH
-    SEGMENT_LENGTH = 6
-
-    # DASH: This allows for further subdivision of segments into smaller pieces, called fragments, which can be useful
-    # for finer control over playback and buffering. There will be two fragments SEGMENT_LENGTH/FRAGMENT_LENGTH
-    # HLS: Segment is the smallest and self-contained media in MPEG-2 Transport Stream (TS)
-    FRAGMENT_LENGTH = 3
-
-    # HLS: to prevent the actual segment_length to be less than this value
-    # which can help avoid very short segments that might be inefficient for streaming.
-    MIN_SEGMENT_LENGTH = 3
-
-    # DASH:The player will buffer more content before starting playback, leading to more stable playback with fewer
-    # interruptions, but at the cost of longer startup times
-    # HLS: Auto control by player and MIN_SEGMENT_LENGTH is needed instead.
-    SEGMENT_BUFFER_COUNT = 2
-
-    # input_s3_uri_file: s3://production-cm/media-convert/startwar.mp4
-    # output_s3_uri_path: s3://production-cm/media-convert-output
-    # allow_hd: false
-    # framerate: FR_CINEMATIC
+    include Helper::JobCreator
+    include Helper::AwsClient
 
     delegate :input_s3_uri_file, :output_s3_uri_path, :allow_hd, :framerate, to: :context
 
     def self.from_event(event)
-      options = extract_job_settings(event)
+      options = extract_s3_options_from_event(event)
       call(**options)
     end
 
-    def self.extract_job_settings(event)
-      event_parser = Service::S3EventParser.call(event: event)
+    def self.extract_s3_options_from_event(event)
+      event_parser = Service::Parser::S3Event.call(event: event)
       s3_uri = event_parser.result[:s3_uri]
 
       # ouput-production-cm
@@ -66,20 +32,41 @@ module Service
       }
     end
 
+    # result.job(id, arn, status, created_at) ( https://docs.aws.amazon.com/sdk-for-ruby/v3/api/Aws/MediaConvert/Types/Job.html )
     def call
-      client.create_job(job_options)
+      create_job
+      send_sqs_message
+    rescue Aws::MediaConvert::Errors::ServiceError, Aws::SQS::Errors::ServiceError => e
+      context.fail!(message: e.message)
     end
 
-    def client
-      @client ||= Aws::MediaConvert::Client.new(client_options)
-    end
-
-    def client_options
+    def job_result(job_type)
       {
-        access_key_id: ENV.fetch('AWS_CONF_ACCESS_KEY_ID'),
-        secret_access_key: ENV.fetch('AWS_CONF_SECRET_ACCESS_KEY'),
-        region: ENV.fetch('AWS_CONF_REGION')
+        id: job_type.id,
+        arn: job_type.arn,
+        status: job_type.status,
+        created_at: job_type.created_at
       }
+    end
+
+    # id: '5678920-02-2222', arn: 'arn:5678920-02-2222', status: 'PROCESSING', created_at: '2024-06-18 04:30:47 +0000'
+    def create_job
+      job_response = media_convert_client.create_job(job_options)
+      context.result = job_result(job_response.job)
+    end
+
+    def sqs_message_body
+      context.result.merge(
+        message_type: :media_convert_create_job,
+        input_file: input_s3_uri_file
+      )
+    end
+
+    def send_sqs_message
+      sqs_client.send_message(
+        queue_url: sqs_url,
+        message_body: sqs_message_body.to_json
+      )
     end
 
     def output_sub_dir_name
@@ -98,11 +85,6 @@ module Service
         role: arn_role,
         settings: settings
       }
-    end
-
-    def arn_role
-      # 'arn:aws:iam::123456789012:role/MediaConvert_Default_Role'
-      ENV.fetch('AWS_CONF_MEDIA_CONVERT_ROLE')
     end
 
     def settings
@@ -190,11 +172,6 @@ module Service
       }
     end
 
-    # 1080p (1920x1080) - High quality
-    # 720p (1280x720) - Medium quality
-    # 480p (854x480) - Standard quality
-    # 360p (640x360) - Low quality
-    # 240p (426x240) - Very low quality
     def video_qualities
       @video_qualities ||= {
         high: { resolution: '1920x1080', bitrate: 4500..6000, framerate: [24, 30, 60], audio_rate: 128 },

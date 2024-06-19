@@ -3,6 +3,7 @@ on:
   push:
     branches:
       - build_lambda
+      - 28-handle-api-bookmeplus-integration
 
 jobs:
   build_and_deploy:

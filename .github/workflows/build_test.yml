@@ -31,3 +31,8 @@ jobs:
           AWS_CONF_REGION: "ap-southeast-1"
           AWS_CONF_BUCKET_OUTPUT: "-cm"
           AWS_CONF_MEDIA_CONVERT_ROLE: "arn:aws:iam:::role/"
+          AWS_SQS_QUEUE_URL: "https://sqs.ap-southeast-1.amazonaws.com/636758493619/media-convert-queue"
+
+          API_CM_HOST: "https://widget-loader.ngrok.io" #:9000
+          API_CM_KEY: "Subscriber#key"
+          API_CM_NAME: "Subscriber#Name"

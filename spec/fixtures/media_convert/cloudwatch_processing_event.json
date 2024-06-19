@@ -1,0 +1,20 @@
+{
+  "version": "0",
+  "id": "2e3110c6-791f-1ec2-d91f-9515d8d5f467",
+  "detail-type": "MediaConvert Job State Change",
+  "source": "aws.mediaconvert",
+  "account": "636758493619",
+  "time": "2024-06-19T15:05:46Z",
+  "region": "ap-southeast-1",
+  "resources": [
+    "arn:aws:mediaconvert:ap-southeast-1:636758493619:jobs/1718809546016-qkgk9n"
+  ],
+  "detail": {
+    "timestamp": 1718809546765,
+    "accountId": "636758493619",
+    "queue": "arn:aws:mediaconvert:ap-southeast-1:636758493619:queues/Default",
+    "jobId": "1718809546016-qkgk9n",
+    "status": "PROGRESSING",
+    "userMetadata": {}
+  }
+}

@@ -1,10 +1,9 @@
 require 'app_spec_helper'
-require 'service/s3_event_parser'
+require 'service/parser/s3_event'
 
-describe Service::S3EventParser do
+describe Service::Parser::S3Event do
   let(:event) do
-    dir_name = File.dirname(__dir__)
-    file_path = File.join(dir_name, 'fixtures', 'media_convert', 'create_job_event.json')
+    file_path = File.join($SPEC_ROOT, 'fixtures', 'media_convert', 'create_job_event.json')
     JSON.parse(File.read(file_path))
   end
 
