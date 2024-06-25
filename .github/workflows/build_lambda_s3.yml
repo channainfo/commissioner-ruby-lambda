@@ -2,8 +2,7 @@ name: Deploy Ruby Lambda Layer
 on:
   push:
     branches:
-      - build_lambda
-      - 28-handle-api-bookmeplus-integration
+      - build
 
 jobs:
   build_and_deploy:

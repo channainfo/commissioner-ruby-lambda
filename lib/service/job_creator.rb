@@ -1,5 +1,6 @@
 require_relative 'base'
-require_relative 'helper/job_creator'
+require_relative 'helper/media_convert/config'
+require_relative 'helper/media_convert/output'
 require_relative 'helper/aws_client'
 require_relative 'parser/s3_event'
 
@@ -7,10 +8,11 @@ require 'aws-sdk-mediaconvert'
 
 module Service
   class JobCreator < Base
-    include Helper::JobCreator
+    include Helper::MediaConvert::Output
+
     include Helper::AwsClient
 
-    delegate :input_s3_uri_file, :output_s3_uri_path, :allow_hd, :framerate, to: :context
+    delegate :input_s3_uri_file, :output_s3_uri_path, to: :context
 
     def self.from_event(event)
       options = extract_s3_options_from_event(event)
@@ -26,18 +28,57 @@ module Service
 
       {
         input_s3_uri_file: s3_uri,
-        output_s3_uri_path: "s3://#{destination_bucket}/medias",
-        allow_hd: false,
-        framerate: Service::JobCreator::FR_CINEMATIC
+        output_s3_uri_path: "s3://#{destination_bucket}/medias"
       }
     end
 
     # result.job(id, arn, status, created_at) ( https://docs.aws.amazon.com/sdk-for-ruby/v3/api/Aws/MediaConvert/Types/Job.html )
+    # input_s3_uri_file: s3://production-cm/media-convert/startwar.mp4
+    # output_s3_uri_path: s3://production-cm/media-convert-output
     def call
+      extract_transcode_options
       create_job
       send_sqs_message
     rescue Aws::MediaConvert::Errors::ServiceError, Aws::SQS::Errors::ServiceError => e
       context.fail!(message: e.message)
+    end
+
+    def extract_transcode_options
+      result = input_s3_uri_file.split('/').last.split('.')
+      file_name = result[0..-2].join('.')
+      ext = result[-1].downcase
+
+      context.fail!(message: "invalid extension: #{ext}, expected format mp4") if ext != 'mp4'
+
+      (framerate, protocol, quality) = file_name.split('-').last(3)
+
+      ensure_framerate(framerate)
+      ensure_protocol(protocol)
+      ensure_quality(quality)
+    end
+
+    def ensure_quality(quality)
+      if quality.nil? || !quality.match?(/q[1-9]/)
+        context.fail!(message: "invalid quality: #{quality} for format /q[1-9]/")
+      end
+
+      context.quality = quality[1..].to_i
+    end
+
+    def ensure_protocol(protocol)
+      if protocol.nil? || !protocol.match?(/p[1-9]/)
+        context.fail!(message: "invalid protocol: #{protocol}, expected format /p[1-9]/")
+      end
+
+      context.protocol = protocol[1..].to_i
+    end
+
+    def ensure_framerate(framerate)
+      if framerate.nil? || !framerate.match?(/f(24|30|60)/)
+        context.fail!(message: "invalid framerate: #{framerate}, expected format /f(24|30|60)/")
+      end
+
+      context.framerate = framerate[1..].to_i # 24/30/60
     end
 
     def job_result(job_type)
@@ -103,83 +144,36 @@ module Service
             timecode_source: 'ZEROBASED'
           }
         ],
-        output_groups: [
-          output_group_dash,
-          output_group_hls
-        ]
+        output_groups: output_groups
       }
 
       @settings
     end
 
-    def output_group_hls
-      # hls config
-      {
-        name: 'HLSGroup',
-        output_group_settings: {
-          type: 'HLS_GROUP_SETTINGS',
-          hls_group_settings: {
-            destination: "#{output_s3_uri_path}/hls/#{output_sub_dir_name}/",
-            segment_length_control: SEGMENT_LENGTH_CONTROL,
-            segment_control: 'SEGMENTED_FILES',
-            segment_length: SEGMENT_LENGTH,
-            # in HLS, the buffering behavior is managed by the player
-            # min_buffer_time: SEGMENT_LENGTH * SEGMENT_BUFFER_COUNT
-            min_segment_length: MIN_SEGMENT_LENGTH
-          }
-        },
-        outputs: config_output_hlses
-      }
-    end
+    def selected_qualities(bitwise_protocol)
+      supported_qualities = %i[low standard medium high]
 
-    # protocol either: 'HLS' or DASH
-    def config_outputs(protocol)
       result = []
-      result << create_output(protocol, :high) if allow_hd
 
-      result.push(
-        create_output(protocol, :medium),
-        create_output(protocol, :standard),
-        create_output(protocol, :low)
-      )
+      supported_qualities.each_with_index do |quality, index|
+        quality_on = (2**index) & bitwise_protocol
+        result << quality if quality_on != 0
+      end
+
+      result
     end
 
-    def config_output_dashs
-      config_outputs('DASH')
-    end
+    def selected_protocols(bitwise_protocol)
+      supported_protocols = %w[FILE HLS DASH]
 
-    def config_output_hlses
-      config_outputs('HLS')
-    end
+      result = []
 
-    def output_group_dash
-      # dash config
-      min_buffer_time = SEGMENT_LENGTH * SEGMENT_BUFFER_COUNT * 1000
-      {
-        name: 'DASHGroup',
-        output_group_settings: {
-          type: 'DASH_ISO_GROUP_SETTINGS',
-          dash_iso_group_settings: {
-            destination: "#{output_s3_uri_path}/dash/#{output_sub_dir_name}/",
-            segment_length_control: SEGMENT_LENGTH_CONTROL,
-            segment_length: SEGMENT_LENGTH,
-            segment_control: 'SEGMENTED_FILES',
-            min_buffer_time: min_buffer_time,
-            fragment_length: FRAGMENT_LENGTH
-          }
-        },
-        outputs: config_output_dashs
-      }
-    end
+      supported_protocols.each_with_index do |protocol, index|
+        protocol_on = (2**index) & bitwise_protocol
+        result << protocol if protocol_on != 0
+      end
 
-    def video_qualities
-      @video_qualities ||= {
-        high: { resolution: '1920x1080', bitrate: 4500..6000, framerate: [24, 30, 60], audio_rate: 128 },
-        medium: { resolution: '1280x720', bitrate: 2500..3500, framerate: [24, 30, 60], audio_rate: 128 },
-        standard: { resolution: '854x480', bitrate: 1000..1500, framerate: [24, 30], audio_rate: 128 },
-        low: { resolution: '640x360', bitrate: 500..1000, framerate: [24, 30], audio_rate: 96 },
-        bottom: { resolution: '426x240', bitrate: 300..700, framerate: [24, 30], audio_rate: 64 }
-      }
+      result
     end
   end
 end

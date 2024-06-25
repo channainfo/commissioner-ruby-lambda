@@ -9,7 +9,6 @@ module Service
         media_convert_info
       end
 
-      # rubocop:disable Metrics/AbcSize
       def media_convert_info
         detail = event['detail']
 
@@ -29,7 +28,6 @@ module Service
 
         context.result
       end
-      # rubocop:enable Metrics/AbcSize
     end
   end
 end
