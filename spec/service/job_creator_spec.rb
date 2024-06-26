@@ -12,27 +12,21 @@ describe Service::JobCreator do
 
   subject do
     described_class.new(
-      input_s3_uri_file: 's3://production-cm/media-convert/startwar.mp4',
-      output_s3_uri_path: 's3://production-cm/media-convert-output',
-      allow_hd: false,
-      framerate: described_class::FR_CINEMATIC
+      input_s3_uri_file: 's3://production-cm/media-convert/startwar-f30-p7-q7.mp4',
+      output_s3_uri_path: 's3://production-cm/media-convert-output'
     )
   end
 
   describe 'delegate' do
     it 'delegate to context' do
-      expect(subject.input_s3_uri_file).to eq 's3://production-cm/media-convert/startwar.mp4'
+      expect(subject.input_s3_uri_file).to eq 's3://production-cm/media-convert/startwar-f30-p7-q7.mp4'
       expect(subject.output_s3_uri_path).to eq 's3://production-cm/media-convert-output'
-      expect(subject.allow_hd).to eq false
-      expect(subject.framerate).to eq described_class::FR_CINEMATIC
     end
   end
 
   describe '.from_event' do
     it 'return options' do
       options = {
-        allow_hd: false,
-        framerate: 24,
         input_s3_uri_file: 's3://production-cm/input/cohesion.mp4',
         output_s3_uri_path: "s3://#{bucket_output}/medias"
       }
@@ -50,13 +44,138 @@ describe Service::JobCreator do
       result = described_class.extract_s3_options_from_event(event)
 
       expected_result = {
-        allow_hd: false,
-        framerate: 24,
         input_s3_uri_file: 's3://production-cm/input/cohesion.mp4',
         output_s3_uri_path: "s3://#{bucket_output}/medias"
       }
 
       expect(result).to match(expected_result)
+    end
+  end
+
+  describe '#selected_qualities' do
+    it 'return low and medium qualities' do
+      # low standard medium high
+      low_and_medium = 1 + 0 + 4
+
+      result = subject.send(:selected_qualities, low_and_medium)
+
+      expect(result).to eq %i[low medium]
+    end
+
+    it 'return low, standard, medium and high qualities' do
+      # low standard medium high
+      quality = 1 + 2 + 4 + 8
+      result = subject.send(:selected_qualities, quality)
+
+      expect(result).to eq %i[low standard medium high]
+    end
+  end
+
+  describe '#settings' do
+    it 'return settings with inputs and output_groups' do
+      subject.send(:extract_transcode_options)
+      result = subject.send(:settings)
+
+      expect(result[:inputs]).to be_a_kind_of(Array)
+      expect(result[:output_groups]).to be_a_kind_of(Array)
+      expect(result[:output_groups]).to have_attributes(size: 3)
+    end
+  end
+
+  describe '#output_groups' do
+    output_group_file = ['FileGroup']
+
+    it 'return output_group_file if protocol is a file' do
+      allow(subject).to receive(:selected_protocols).and_return(['FILE'])
+      allow(subject).to receive(:output_group_file).and_return(output_group_file)
+
+      result = subject.send(:output_groups)
+      expect(result).to match([output_group_file])
+    end
+
+    it 'return output_group_file if protocol is a file, hls' do
+      output_group_file = ['FileGroup']
+      output_group_dash = ['DASHGroup']
+      output_group_hls = ['HLSGroup']
+
+      allow(subject).to receive(:selected_protocols).and_return(%w[FILE DASH HLS])
+      allow(subject).to receive(:output_group_file).and_return(output_group_file)
+      allow(subject).to receive(:output_group_dash).and_return(output_group_dash)
+      allow(subject).to receive(:output_group_hls).and_return(output_group_hls)
+
+      result = subject.send(:output_groups)
+      expect(result).to match([output_group_file, output_group_dash, output_group_hls])
+    end
+  end
+
+  describe '#selected_protocols' do
+    it 'return low and medium qualities' do
+      # file hls dash
+      hls_dash = 0 + 2 + 4
+
+      result = subject.send(:selected_protocols, hls_dash)
+
+      expect(result).to eq %w[HLS DASH]
+    end
+
+    it 'return low, standard, medium and high qualities' do
+      # file hls dash
+      file_dash = 1 + 0 + 4
+
+      result = subject.send(:selected_protocols, file_dash)
+
+      expect(result).to eq %w[FILE DASH]
+    end
+  end
+
+  describe '#extract_transcode_options' do
+    subject { described_class.new(input_s3_uri_file: 's3://production-cm/media-convert/startwar.-uuid-f24-p1-q3.mp4') }
+
+    context 'with valid input file' do
+      it 'return extract transcode options correctly' do
+        subject.send(:extract_transcode_options)
+
+        expect(subject.context.success?).to eq true
+        expect(subject.context.framerate).to eq 24
+        expect(subject.context.protocol).to eq 1
+        expect(subject.context.quality).to eq 3
+      end
+    end
+
+    context 'with invalid extension' do
+      subject { described_class.new(input_s3_uri_file: 's3://production-cm/media-convert/startwar.-uuid-p1-q3.avi') }
+
+      it 'return raise error with invalid extension' do
+        expect { subject.send(:extract_transcode_options) }.to raise_error Interactor::Failure
+        expect(subject.context.message).to eq('invalid extension: avi, expected format mp4')
+      end
+    end
+
+    context 'with invalid framerate' do
+      subject { described_class.new(input_s3_uri_file: 's3://production-cm/media-convert/startwarddq3.mp4') }
+
+      it 'return raise error with invalid framerate' do
+        expect { subject.send(:extract_transcode_options) }.to raise_error Interactor::Failure
+        expect(subject.context.message).to eq('invalid framerate: startwarddq3, expected format /f(24|30|60)/')
+      end
+    end
+
+    context 'with invalid protocol' do
+      subject { described_class.new(input_s3_uri_file: 's3://production-cm/media-convert/startwar-f30-p-q3.mp4') }
+
+      it 'return raise error with invalid protocol' do
+        expect { subject.send(:extract_transcode_options) }.to raise_error Interactor::Failure
+        expect(subject.context.message).to eq('invalid protocol: p, expected format /p[1-9]/')
+      end
+    end
+
+    context 'with invalid quality' do
+      subject { described_class.new(input_s3_uri_file: 's3://production-cm/media-convert/startwar-f60-p1-p3a.mp4') }
+
+      it 'return raise error with invalid quality' do
+        expect { subject.send(:extract_transcode_options) }.to raise_error Interactor::Failure
+        expect(subject.context.message).to eq('invalid quality: p3a for format /q[1-9]/')
+      end
     end
   end
 
@@ -172,22 +291,21 @@ describe Service::JobCreator do
 
   describe '#job_options' do
     it 'return job_options' do
-      result = subject.send(:job_options)
-      expect(result).to be_kind_of(Hash)
-      expect(result).to include(:role, :settings)
-    end
-  end
+      settings = {}
+      arn_role = 'arn:'
 
-  describe '#settings' do
-    it 'return settins' do
-      result = subject.send(:settings)
+      allow(subject).to receive(:arn_role).and_return(arn_role)
+      allow(subject).to receive(:settings).and_return(settings)
+      result = subject.send(:job_options)
+
       expect(result).to be_kind_of(Hash)
-      expect(result).to include(:inputs, :output_groups)
+      expect(result).to match(role: arn_role, settings: settings)
     end
   end
 
   describe '#output_group_hls' do
     it 'return output_group_hls settings' do
+      allow(subject).to receive(:config_output_hlses).and_return([])
       result = subject.send(:output_group_hls)
       expect(result).to be_kind_of(Hash)
       expect(result).to include(:name, :output_group_settings, :outputs)
@@ -196,6 +314,7 @@ describe Service::JobCreator do
 
   describe '#output_group_dash' do
     it 'return output_group_dash settings' do
+      allow(subject).to receive(:config_output_dashs).and_return([])
       result = subject.send(:output_group_dash)
 
       expect(result).to be_kind_of(Hash)
@@ -204,9 +323,9 @@ describe Service::JobCreator do
     end
   end
 
-  describe '#video_qualities' do
-    it 'return video_qualities settings' do
-      result = subject.send(:video_qualities)
+  describe '#video_quality_configs' do
+    it 'return video_quality_configs settings' do
+      result = subject.send(:video_quality_configs)
 
       expect(result).to be_kind_of(Hash)
       expect(result).to include(:high, :medium, :standard, :low)
@@ -214,19 +333,16 @@ describe Service::JobCreator do
   end
 
   describe '#config_outputs' do
-    it 'return config_outputs settings with high quality included if allow_hd is true' do
-      allow(subject).to receive(:allow_hd).and_return(true)
+    it 'return config_outputs settings' do
+      qualities = %i[low standard medium]
+      protocol = 'HLS'
+      allow(subject).to receive(:selected_qualities).and_return(qualities)
 
-      result = subject.send(:config_outputs, 'HLS')
+      expect(subject).to receive(:create_output).with(protocol, :low)
+      expect(subject).to receive(:create_output).with(protocol, :standard)
+      expect(subject).to receive(:create_output).with(protocol, :medium)
 
-      expect(result).to be_kind_of(Array)
-      expect(result.count).to eq(4)
-    end
-
-    it 'return config_outputs settings without high quality included if allow_hd is false' do
-      allow(subject).to receive(:allow_hd).and_return(false)
-
-      result = subject.send(:config_outputs, 'HLS')
+      result = subject.send(:config_outputs, protocol)
 
       expect(result).to be_kind_of(Array)
       expect(result.count).to eq(3)

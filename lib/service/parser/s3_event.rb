@@ -9,7 +9,6 @@ module Service
         s3_object_info
       end
 
-      # rubocop:disable Metrics/AbcSize
       def s3_object_info
         record = event['Records'][0]
         context.result = {
@@ -23,7 +22,6 @@ module Service
 
         context.result
       end
-      # rubocop:enable Metrics/AbcSize
     end
   end
 end

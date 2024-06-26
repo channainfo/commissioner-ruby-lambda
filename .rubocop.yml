@@ -20,9 +20,15 @@ Metrics/BlockLength:
     - "spec/**/*.rb" # Exclude spec files from block length checks
   Max: 25 # Maximum block length
 
+Metrics/AbcSize:
+  Max: 50
+
 # Documentation
 Style/Documentation:
   Enabled: false # Skip documentation check
+
+Metrics/ModuleLength:
+  Max: 500
 
 # Method length
 Metrics/MethodLength:
