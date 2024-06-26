@@ -5,15 +5,16 @@ require_relative '../service/job_creator'
 $logger = Logger.new($stdout)
 $logger.info { "#{__FILE__} is loading" }
 
-def handler(event:, context:)
+def create_job_handler(event:, context:)
   # Initialize logger
   $logger = Logger.new($stdout)
   $logger.info { "\n Create job with event: #{event}, context: #{context}" }
 
-  Service::JobCreator.from_event(event)
+  service_context = Service::JobCreator.from_event(event)
 
-  { statusCode: 200, body: JSON.generate('Event processed successfully') }
+  if service_context.success?
+    { status_code: 200, body: service_context.result }
+  else
+    { status_code: 400, body: { error_message: service_context.message } }
+  end
 end
-
-# Enable this to test if it can be invoked correctly
-# handler(event: { job: 'tyui6789' }, context: 'create_job')

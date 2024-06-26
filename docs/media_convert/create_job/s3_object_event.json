@@ -1,0 +1,38 @@
+{
+  "Records": [
+    {
+      "eventVersion": "2.1",
+      "eventSource": "aws:s3",
+      "awsRegion": "ap-southeast-1",
+      "eventTime": "2024-06-18T03:11:55.778Z",
+      "eventName": "ObjectCreated:CompleteMultipartUpload",
+      "userIdentity": {
+        "principalId": "A14CU4UNDU10GR"
+      },
+      "requestParameters": {
+        "sourceIPAddress": "172.16.119.215"
+      },
+      "responseElements": {
+        "x-amz-request-id": "YGP5GQ97CAYPAFGN",
+        "x-amz-id-2": "Lwc6VIQ/E8oM9Bd5vZAGRwg/1zDI01lUQwQ56SvfFKjrLf6sUv9qXB0bUoetJu29tYTPWus0lmmws/T+YXbKqAfRHet8iiRp"
+      },
+      "s3": {
+        "s3SchemaVersion": "1.0",
+        "configurationId": "tf-s3-lambda-20240618030659407200000001",
+        "bucket": {
+          "name": "input-production-cm",
+          "ownerIdentity": {
+            "principalId": "A14CU4UNDU10GR"
+          },
+          "arn": "arn:aws:s3:::input-production-cm"
+        },
+        "object": {
+          "key": "medias/Kung.Fu.Panda4-2024.mp4",
+          "size": 1678526620,
+          "eTag": "b05139336ecab305b145c870a152bf4c-101",
+          "sequencer": "006670FAF40C41D64C"
+        }
+      }
+    }
+  ]
+}

@@ -2,6 +2,7 @@ source 'https://rubygems.org'
 
 gem 'activesupport'
 gem 'aws-sdk-mediaconvert'
+gem 'aws-sdk-sqs'
 gem 'httparty'
 gem 'interactor'
 gem 'nokogiri'

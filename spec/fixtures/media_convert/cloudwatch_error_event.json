@@ -1,0 +1,22 @@
+{
+  "version": "0",
+  "id": "240e501e-2ba9-2a67-017a-850b7bb2e95f",
+  "detail-type": "MediaConvert Job State Change",
+  "source": "aws.mediaconvert",
+  "account": "636758493619",
+  "time": "2024-06-20T07:15:04Z",
+  "region": "ap-southeast-1",
+  "resources": [
+    "arn:aws:mediaconvert:ap-southeast-1:636758493619:jobs/1718867702267-tfl96w"
+  ],
+  "detail": {
+    "timestamp": 1718867704681,
+    "accountId": "636758493619",
+    "queue": "arn:aws:mediaconvert:ap-southeast-1:636758493619:queues/Default",
+    "jobId": "1718867702267-tfl96w",
+    "status": "ERROR",
+    "errorCode": 1404,
+    "errorMessage": "Unable to open input file [s3://input-production-cm/medias/%E1%9E%8F%E1%9E%97%E1%9E%96%E1%9E%A2%E1%9E%99%E1%9E%80.mp4]: [Failed probe/open: [Can't read input stream: [Failed to read data: HeadObject failed]]]",
+    "userMetadata": {}
+  }
+}

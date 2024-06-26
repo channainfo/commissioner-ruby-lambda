@@ -1,0 +1,20 @@
+{
+  "Records": [
+    {
+      "messageId": "1c92d349-8b9e-401b-bcfa-2a5f5c9b1a66",
+      "receiptHandle": "AQEB...J3sY==",
+      "body": "{\"id\":\"1234-5678-9012\", \"arn\":\"1234-5678-9012\", \"status\":\"created\", \"input_file\": \"s3://production-cm/media-convert/startwar.mp4\", \"message_type\": \"media_convert_create_job\"}",
+      "attributes": {
+        "ApproximateReceiveCount": "1",
+        "SentTimestamp": "1599032560013",
+        "SenderId": "AROAI6VVVGVWQL4JYJS",
+        "ApproximateFirstReceiveTimestamp": "1599032561015"
+      },
+      "messageAttributes": {},
+      "md5OfBody": "7b7c9d4ab0c8e0b0e0b3e8e4b8f9e8d5",
+      "eventSource": "aws:sqs",
+      "eventSourceARN": "arn:aws:sqs:us-east-1:123456789012:media-convert-queue",
+      "awsRegion": "us-east-1"
+    }
+  ]
+}

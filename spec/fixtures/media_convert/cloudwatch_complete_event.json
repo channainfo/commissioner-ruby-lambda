@@ -1,0 +1,107 @@
+{
+  "version": "0",
+  "id": "416068ac-f99d-fe9d-79b3-5724684e8182",
+  "detail-type": "MediaConvert Job State Change",
+  "source": "aws.mediaconvert",
+  "account": "636758493619",
+  "time": "2024-06-19T15:06:31Z",
+  "region": "ap-southeast-1",
+  "resources": [
+    "arn:aws:mediaconvert:ap-southeast-1:636758493619:jobs/1718809546016-qkgk9n"
+  ],
+  "detail": {
+    "timestamp": 1718809591696,
+    "accountId": "636758493619",
+    "queue": "arn:aws:mediaconvert:ap-southeast-1:636758493619:queues/Default",
+    "jobId": "1718809546016-qkgk9n",
+    "status": "COMPLETE",
+    "userMetadata": {},
+    "outputGroupDetails": [
+      {
+        "outputDetails": [
+          {
+            "durationInMs": 273000,
+            "videoDetails": {
+              "widthInPx": 1280,
+              "heightInPx": 720,
+              "averageBitrate": 2498902
+            }
+          },
+          {
+            "durationInMs": 273000,
+            "videoDetails": {
+              "widthInPx": 854,
+              "heightInPx": 480,
+              "averageBitrate": 999812
+            }
+          },
+          {
+            "durationInMs": 273000,
+            "videoDetails": {
+              "widthInPx": 640,
+              "heightInPx": 360,
+              "averageBitrate": 499886
+            }
+          }
+        ],
+        "playlistFilePaths": [
+          "s3://output-production-cm/medias/dash/cohesion/cohesion.mpd"
+        ],
+        "type": "DASH_ISO_GROUP"
+      },
+      {
+        "outputDetails": [
+          {
+            "outputFilePaths": [
+              "s3://output-production-cm/medias/hls/cohesion/cohesion-1280_720.m3u8"
+            ],
+            "durationInMs": 273000,
+            "videoDetails": {
+              "widthInPx": 1280,
+              "heightInPx": 720,
+              "averageBitrate": 2498902
+            }
+          },
+          {
+            "outputFilePaths": [
+              "s3://output-production-cm/medias/hls/cohesion/cohesion-854_480.m3u8"
+            ],
+            "durationInMs": 273000,
+            "videoDetails": {
+              "widthInPx": 854,
+              "heightInPx": 480,
+              "averageBitrate": 999913
+            }
+          },
+          {
+            "outputFilePaths": [
+              "s3://output-production-cm/medias/hls/cohesion/cohesion-640_360.m3u8"
+            ],
+            "durationInMs": 273000,
+            "videoDetails": {
+              "widthInPx": 640,
+              "heightInPx": 360,
+              "averageBitrate": 499942
+            }
+          }
+        ],
+        "playlistFilePaths": [
+          "s3://output-production-cm/medias/hls/cohesion/cohesion.m3u8"
+        ],
+        "type": "HLS_GROUP"
+      }
+    ],
+    "paddingInserted": 0,
+    "blackVideoDetected": 0,
+    "warnings": [
+      {
+        "code": 230001,
+        "count": 1
+      },
+      {
+        "code": 230005,
+        "count": 1
+      }
+    ]
+  }
+}
