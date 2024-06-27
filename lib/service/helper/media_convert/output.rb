@@ -124,8 +124,7 @@ module Service
           }
 
           container_settings = {
-            container: protocol_to_container_mapping[group_type.to_sym],
-            mpd_settings: {}
+            container: protocol_to_container_mapping[group_type.to_sym]
           }
 
           {

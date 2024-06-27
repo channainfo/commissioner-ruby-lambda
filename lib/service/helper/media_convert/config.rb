@@ -34,6 +34,9 @@ module Service
         # HLS: Auto control by player and MIN_SEGMENT_LENGTH is needed instead.
         SEGMENT_BUFFER_COUNT = 2
 
+        SUPPORTED_PROTOCOLS = %w[FILE HLS DASH].freeze
+        SUPPORTED_QUALITIES = %i[low standard medium high].freeze
+
         def video_quality_configs
           @video_quality_configs ||= {
             high: { resolution: '1920x1080', bitrate: 4500..6000, framerate: [24, 30, 60], audio_rate: 128 },
