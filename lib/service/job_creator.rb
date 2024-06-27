@@ -151,11 +151,9 @@ module Service
     end
 
     def selected_qualities(bitwise_protocol)
-      supported_qualities = %i[low standard medium high]
-
       result = []
 
-      supported_qualities.each_with_index do |quality, index|
+      SUPPORTED_QUALITIES.each_with_index do |quality, index|
         quality_on = (2**index) & bitwise_protocol
         result << quality if quality_on != 0
       end
@@ -164,11 +162,9 @@ module Service
     end
 
     def selected_protocols(bitwise_protocol)
-      supported_protocols = %w[FILE HLS DASH]
-
       result = []
 
-      supported_protocols.each_with_index do |protocol, index|
+      SUPPORTED_PROTOCOLS.each_with_index do |protocol, index|
         protocol_on = (2**index) & bitwise_protocol
         result << protocol if protocol_on != 0
       end

@@ -364,9 +364,22 @@ describe Service::JobCreator do
   end
 
   describe '#create_output' do
-    it 'return create_output settings' do
-      result = subject.send(:create_output, 'HLS', :high)
+    it 'return create_output settings with container MPD' do
+      result = subject.send(:create_output, 'DASH', :medium)
       expect(result).to include(:name_modifier, :container_settings, :video_description, :audio_descriptions)
+      expect(result[:container_settings][:container]).to eq 'MPD'
+    end
+
+    it 'return create_output settings with container M3U8' do
+      result = subject.send(:create_output, 'HLS', :medium)
+      expect(result).to include(:name_modifier, :container_settings, :video_description, :audio_descriptions)
+      expect(result[:container_settings][:container]).to eq 'M3U8'
+    end
+
+    it 'return create_output settings with container MP4' do
+      result = subject.send(:create_output, 'FILE', :medium)
+      expect(result).to include(:name_modifier, :container_settings, :video_description, :audio_descriptions)
+      expect(result[:container_settings][:container]).to eq 'MP4'
     end
   end
 end
