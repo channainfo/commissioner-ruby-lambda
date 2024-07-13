@@ -129,13 +129,23 @@ describe Service::JobCreator do
   end
 
   describe '#extract_transcode_options' do
-    subject { described_class.new(input_s3_uri_file: 's3://production-cm/media-convert/startwar.-uuid-f24-p1-q3.mp4') }
+    subject do
+      described_class.new(
+        input_s3_uri_file: 's3://production-cm/media-convert/2024-08-01/startwar.-uuid-f24-p1-q3.mp4'
+      )
+    end
 
     context 'with valid input file' do
       it 'return extract transcode options correctly' do
         subject.send(:extract_transcode_options)
 
+        segment_data = '2024-08-01'
+        calculated_segment = Digest::MD5.hexdigest(segment_data)
+        expected_segment = 'c09fda3b7c33e798acd103b71a6fc404'
+
         expect(subject.context.success?).to eq true
+        expect(calculated_segment).to eq expected_segment
+        expect(subject.context.segment).to eq expected_segment
         expect(subject.context.framerate).to eq 24
         expect(subject.context.protocol).to eq 1
         expect(subject.context.quality).to eq 3
@@ -230,12 +240,24 @@ describe Service::JobCreator do
   end
 
   describe '#send_sqs_message' do
-    it 'send sqs message' do
-      message_body = {}
-      options = { queue_url: subject.sqs_url, message_body: message_body.to_json }
-      allow(subject).to receive(:sqs_message_body).and_return(message_body)
-      expect(subject.sqs_client).to receive(:send_message).with(options)
-      subject.send(:send_sqs_message)
+    context 'with manual segment' do
+      it 'does not send sql message' do
+        subject.context.manual_segment = true
+        expect(subject.sqs_client).to_not receive(:send_message)
+
+        subject.send(:send_sqs_message)
+      end
+    end
+
+    context 'with non manual segment' do
+      it 'send sqs message' do
+        message_body = {}
+        options = { queue_url: subject.sqs_url, message_body: message_body.to_json }
+        allow(subject).to receive(:sqs_message_body).and_return(message_body)
+        expect(subject.sqs_client).to receive(:send_message).with(options)
+
+        subject.send(:send_sqs_message)
+      end
     end
   end
 

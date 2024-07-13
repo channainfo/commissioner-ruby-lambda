@@ -1,0 +1,75 @@
+[
+  {
+    "outputDetails": [
+      {
+        "durationInMs": 273000,
+        "videoDetails": {
+          "widthInPx": 1280,
+          "heightInPx": 720,
+          "averageBitrate": 2498902
+        }
+      },
+      {
+        "durationInMs": 273000,
+        "videoDetails": {
+          "widthInPx": 854,
+          "heightInPx": 480,
+          "averageBitrate": 999812
+        }
+      },
+      {
+        "durationInMs": 273000,
+        "videoDetails": {
+          "widthInPx": 640,
+          "heightInPx": 360,
+          "averageBitrate": 499886
+        }
+      }
+    ],
+    "playlistFilePaths": [
+      "s3://output-production-cm/medias/dash/cohesion/cohesion.mpd"
+    ],
+    "type": "DASH_ISO_GROUP"
+  },
+  {
+    "outputDetails": [
+      {
+        "outputFilePaths": [
+          "s3://output-production-cm/medias/hls/cohesion/cohesion-1280_720.m3u8"
+        ],
+        "durationInMs": 273000,
+        "videoDetails": {
+          "widthInPx": 1280,
+          "heightInPx": 720,
+          "averageBitrate": 2498902
+        }
+      },
+      {
+        "outputFilePaths": [
+          "s3://output-production-cm/medias/hls/cohesion/cohesion-854_480.m3u8"
+        ],
+        "durationInMs": 273000,
+        "videoDetails": {
+          "widthInPx": 854,
+          "heightInPx": 480,
+          "averageBitrate": 999913
+        }
+      },
+      {
+        "outputFilePaths": [
+          "s3://output-production-cm/medias/hls/cohesion/cohesion-640_360.m3u8"
+        ],
+        "durationInMs": 273000,
+        "videoDetails": {
+          "widthInPx": 640,
+          "heightInPx": 360,
+          "averageBitrate": 499942
+        }
+      }
+    ],
+    "playlistFilePaths": [
+      "s3://output-production-cm/medias/hls/cohesion/cohesion.m3u8"
+    ],
+    "type": "HLS_GROUP"
+  }
+]
