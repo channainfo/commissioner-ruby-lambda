@@ -4,6 +4,7 @@ require_relative 'helper/media_convert/output'
 require_relative 'helper/aws_client'
 require_relative 'parser/s3_event'
 
+require 'digest'
 require 'aws-sdk-mediaconvert'
 
 module Service
@@ -33,7 +34,7 @@ module Service
     end
 
     # result.job(id, arn, status, created_at) ( https://docs.aws.amazon.com/sdk-for-ruby/v3/api/Aws/MediaConvert/Types/Job.html )
-    # input_s3_uri_file: s3://production-cm/media-convert/startwar.mp4
+    # input_s3_uri_file: s3://input-production-cm/media-convert/segment/startwar.mp4
     # output_s3_uri_path: s3://production-cm/media-convert-output
     def call
       extract_transcode_options
@@ -44,17 +45,27 @@ module Service
     end
 
     def extract_transcode_options
-      result = input_s3_uri_file.split('/').last.split('.')
-      file_name = result[0..-2].join('.')
-      ext = result[-1].downcase
+      result = input_s3_uri_file.split('/')
+
+      segment = result[-2]
+
+      object_file_name = result.last.split('.')
+      file_name = object_file_name[0..-2].join('.')
+      ext = object_file_name[-1].downcase
 
       context.fail!(message: "invalid extension: #{ext}, expected format mp4") if ext != 'mp4'
 
       (framerate, protocol, quality) = file_name.split('-').last(3)
 
+      ensure_segment(segment)
       ensure_framerate(framerate)
       ensure_protocol(protocol)
       ensure_quality(quality)
+    end
+
+    def ensure_segment(segment)
+      segment_data = segment.nil? || segment == '' ? Time.now.strftime('%Y-%m') : segment
+      context.segment = Digest::MD5.hexdigest(segment_data)
     end
 
     def ensure_quality(quality)
@@ -119,6 +130,10 @@ module Service
 
       @output_sub_dir_name = names[0..-2].join('-')
       @output_sub_dir_name
+    end
+
+    def output_segment_dir_name
+      "#{context.segment}/#{output_sub_dir_name}"
     end
 
     def job_options

@@ -26,7 +26,7 @@ module Service
             output_group_settings: {
               type: 'FILE_GROUP_SETTINGS',
               file_group_settings: {
-                destination: "#{output_s3_uri_path}/file/#{output_sub_dir_name}/"
+                destination: "#{output_s3_uri_path}/file/#{output_segment_dir_name}/"
               }
             },
             outputs: config_output_files
@@ -41,7 +41,7 @@ module Service
             output_group_settings: {
               type: 'DASH_ISO_GROUP_SETTINGS',
               dash_iso_group_settings: {
-                destination: "#{output_s3_uri_path}/dash/#{output_sub_dir_name}/",
+                destination: "#{output_s3_uri_path}/dash/#{output_segment_dir_name}/",
                 segment_length_control: SEGMENT_LENGTH_CONTROL,
                 segment_length: SEGMENT_LENGTH,
                 segment_control: 'SEGMENTED_FILES',
@@ -60,7 +60,7 @@ module Service
             output_group_settings: {
               type: 'HLS_GROUP_SETTINGS',
               hls_group_settings: {
-                destination: "#{output_s3_uri_path}/hls/#{output_sub_dir_name}/",
+                destination: "#{output_s3_uri_path}/hls/#{output_segment_dir_name}/",
                 segment_length_control: SEGMENT_LENGTH_CONTROL,
                 segment_control: 'SEGMENTED_FILES',
                 segment_length: SEGMENT_LENGTH,
