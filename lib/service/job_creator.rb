@@ -136,7 +136,8 @@ module Service
     end
 
     def output_segment_dir_name
-      "#{context.segment}/#{output_sub_dir_name}"
+      # "#{context.segment}/#{output_sub_dir_name}"
+      "#{context.segment}"
     end
 
     def job_options
